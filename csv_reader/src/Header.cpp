@@ -1,20 +1,7 @@
 #include "pch.h"
 #include "Header.h"
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <typeinfo>
-#include <filesystem>
-#include <variant>
-#include <iomanip>
 
-//read_csv
-#include<stdexcept>
-#include<ctime>
-#include<stdio.h>
-#include<chrono>
-#include<iomanip>
 
 using CSVValue = std::variant<int, double, std::string>;
 

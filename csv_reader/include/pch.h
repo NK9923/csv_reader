@@ -9,5 +9,17 @@
 
 // Fügen Sie hier Header hinzu, die vorkompiliert werden sollen.
 #include "framework.h"
+#include<fstream>
+#include<sstream>
+#include<vector>
+#include<typeinfo>
+#include<filesystem>
+#include<variant>
+#include<iomanip>
+#include<stdexcept>
+#include<ctime>
+#include<stdio.h>
+#include<chrono>
+#include<iomanip>
 
 #endif //PCH_H
