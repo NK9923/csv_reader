@@ -14,7 +14,7 @@
 #include <variant>
 
 namespace csv_Reader {
-    __declspec(dllimportexport) std::vector<std::vector<std::variant<int, double, std::string>>> readcsv(const std::string& file_name, size_t& csvLineCount, bool skipFirstColumn);
+    __declspec(dllimportexport) std::vector<std::vector<std::variant<int, double, std::string>>> readcsv(const std::string& file_name, size_t& csvLineCount, bool skipFirstColumn, char delimiter);
     __declspec(dllimportexport) void print_data(std::vector<std::vector< std::variant<int, double, std::string>>>& data, int precision);
     __declspec(dllimportexport) std::string trim(const std::string& s);
     __declspec(dllimportexport) int getLength(const char* filename);
