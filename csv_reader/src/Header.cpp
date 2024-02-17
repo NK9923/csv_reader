@@ -52,7 +52,7 @@ std::vector<std::string> csv_Reader::getWeekdayDates(int startYear, int endYear,
                         weekdayDates.emplace_back(buffer);
                     }
                     if (std::mktime(&timeinfo) == std::mktime(&endDateInfo)) {
-                        return weekdayDates; // Return early if end date is reached
+                        return weekdayDates;
                     }
                 }
                 timeinfo.tm_mday++;
@@ -168,3 +168,41 @@ void csv_Reader::print_data(std::vector<std::vector<CSVValue>>& data, int precis
     }
     std::cout << std::defaultfloat; 
 }
+
+
+void csv_Reader::write_csv(std::vector<std::vector<CSVValue>>& data, std::string filename, bool index, char delimiter, std::optional<std::vector<std::string>> columnNames) {
+    std::ofstream outputFile(filename);
+    if (!outputFile.is_open()) {
+        std::cerr << "Unable to open the file for writing." << std::endl;
+        return;
+    }
+
+    if (columnNames && !columnNames->empty()) {
+        for (size_t i = 0; i < columnNames->size(); ++i) {
+            outputFile << (*columnNames)[i];
+            if (i < columnNames->size() - 1) {
+                outputFile << delimiter;
+            }
+        }
+        outputFile << std::endl;
+    }
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (index) {
+            outputFile << i + 1 << ",";
+        }
+
+        for (size_t j = 0; j < data[i].size(); ++j) {
+            const CSVValue& value = data[i][j];
+            std::visit([&outputFile](auto&& arg) {
+                outputFile << arg;
+                }, value);
+
+            if (j < data[i].size() - 1) {
+                outputFile << delimiter;
+            }
+        }
+        outputFile << std::endl;
+    }
+    outputFile.close();
+};
