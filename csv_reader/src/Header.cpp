@@ -71,7 +71,6 @@ void csv_Reader::getwd() {
 }
 
 
-
 int csv_Reader::getLength(const char* filename) {
     int numRows = 0;
     std::ifstream file(filename);
@@ -88,72 +87,66 @@ int csv_Reader::getLength(const char* filename) {
 };
 
 
+std::vector<CSVValue> csv_Reader::parseTokens(const std::string& line, char delimiter, bool skipFirstColumn) {
+    std::istringstream iss(line);
+    std::vector<CSVValue> columns;
+
+    std::string token;
+    bool firstColumnSkipped = false;
+
+    while (std::getline(iss, token, delimiter)) {
+        if (!firstColumnSkipped && skipFirstColumn) {
+            firstColumnSkipped = true;
+            continue;
+        }
+
+        std::istringstream tokenStream(token);
+        int intValue;
+        double doubleValue;
+
+        if (tokenStream >> doubleValue) {
+            columns.push_back(doubleValue);
+        }
+        else if (tokenStream >> intValue) {
+            columns.push_back(intValue);
+        }
+        else {
+            columns.push_back(token);
+        }
+    }
+
+    return columns;
+}
+
 std::vector<std::vector<CSVValue>> csv_Reader::readcsv(const std::string& file_name, size_t& csvLineCount, bool skipFirstColumn, char delimiter) {
     std::ifstream fin(file_name);
-
-    if (delimiter != ',' && delimiter != ';') {
-        throw std::invalid_argument("Invalid delimiter. Supported delimiters are ',' and ';'");
-    }
 
     if (!fin.is_open()) {
         throw std::runtime_error("Error opening file: " + file_name);
     }
 
-    std::vector<std::vector<CSVValue>> lines;
-
-    std::string line;
-    if (std::getline(fin, line)) { 
-        std::istringstream iss(line);
-        std::string token;
-        std::vector<CSVValue> columns;
-
-        bool firstColumnSkipped = false;
-
-        while (std::getline(iss, token, delimiter)) {
-            if (!firstColumnSkipped && skipFirstColumn) {
-                firstColumnSkipped = true;
-                continue;
-            }
-            columns.push_back(CSVValue{}); 
-        }
-        lines.push_back(columns);  
+    if (delimiter != ',' && delimiter != ';') {
+        throw std::invalid_argument("Invalid delimiter. Supported delimiters are ',' and ';'");
     }
+
+    std::vector<std::vector<CSVValue>> lines;
+    std::string line;
 
     while (std::getline(fin, line)) {
-        std::istringstream iss(line);
-        std::string token;
-        std::vector<CSVValue> columns;
-
-        bool firstColumnSkipped = false;
-
-        while (std::getline(iss, token, delimiter)) {
-            if (!firstColumnSkipped && skipFirstColumn) {
-                firstColumnSkipped = true;
-                continue;
-            }
-
-            std::istringstream tokenStream(token);
-            int intValue;
-            double doubleValue;
-
-            if (tokenStream >> doubleValue) {
-                columns.push_back(doubleValue);
-            }
-            else {
-                if (tokenStream >> intValue) {
-                    columns.push_back(intValue);
-                }
-                else {
-                    columns.push_back(token);
-                }
-            }
-        }
-        lines.push_back(columns);
+        lines.push_back(parseTokens(line, delimiter, skipFirstColumn));
     }
-    csvLineCount = lines.size();
 
-    fin.close(); 
+    csvLineCount = lines.size();
     return lines;
+}
+
+
+void csv_Reader::print_data(const std::vector<double>& data, int precision) {
+    for (const auto& value : data) {
+        std::cout << std::fixed << std::setw(4 + precision) << std::setprecision(precision) << value << "\t";
+    }
+    std::cout << std::endl;
+    std::cout << std::defaultfloat;
 }
 
 
@@ -166,7 +159,7 @@ void csv_Reader::print_data(std::vector<std::vector<CSVValue>>& data, int precis
         }
         std::cout << std::endl;
     }
-    std::cout << std::defaultfloat; 
+    std::cout << std::defaultfloat;
 }
 
 
@@ -206,3 +199,26 @@ void csv_Reader::write_csv(std::vector<std::vector<CSVValue>>& data, std::string
     }
     outputFile.close();
 };
+
+
+void csv_Reader::write_csv(const std::vector<double>& data, std::string filename, bool index, char delimiter, std::optional<std::string> columnName) {
+    std::ofstream outputFile(filename);
+    if (!outputFile.is_open()) {
+        std::cerr << "Unable to open the file for writing." << std::endl;
+        return;
+    }
+
+    if (columnName.has_value() && !columnName.value().empty()) {
+        outputFile << columnName.value() << std::endl;
+    }
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (index) {
+            outputFile << i + 1 << delimiter;
+        }
+
+        outputFile << data[i];
+        outputFile << std::endl;
+    }
+    outputFile.close();
+}
