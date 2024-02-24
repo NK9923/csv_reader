@@ -141,6 +141,21 @@ std::vector<std::vector<CSVValue>> csv_Reader::readcsv(const std::string& file_n
 }
 
 
+std::vector<std::vector<double>> csv_Reader::convertToDouble(std::vector<std::vector<CSVValue>> csvData) {
+    std::vector<std::vector<double>> resultVector;
+    for (const auto& innerVector : csvData) {
+        std::vector<double> tempVector;
+        for (const auto& value : innerVector) {
+            if (auto* pval = std::get_if<double>(&value)) {
+                tempVector.push_back(*pval);
+            }
+        }
+        resultVector.push_back(tempVector);
+    }
+    return resultVector;
+}
+
+
 void csv_Reader::print_data(const std::vector<double>& data, int precision) {
     for (const auto& value : data) {
         std::cout << std::fixed << std::setw(4 + precision) << std::setprecision(precision) << value << "\t";
